@@ -18,13 +18,20 @@ print("USING HORIZONTAL METPV WEATHER DATA")
 print("="*70)
 
 # 1. Load the horizontal weather data
-weather_file = "D:\VS_CODE\Infiswift\metpv_20_automation\metpv_horizontal_pysam.csv"
+weather_file = r"D:\VS_CODE\Infiswift\metpv_20_automation\metpv_horizontal_pysam.csv"
 if not os.path.exists(weather_file):
     print(f"Error: {weather_file} not found. Run convert_horizontal_pysam.py first.")
     exit(1)
 
+# 1. Are "Naive" timestamps really in UTC?
+# Naive 12:00 PM: pvlib calculates the sun's position for 12:00 PM UTC (nighttime in Japan). Zenith = 139° (Sun is behind the Earth).
+# Localized 12:00 PM (JST): pvlib correctly sees the sun overhead. Zenith = 57°.
+# Result: If we don't localize, the simulation thinks it's dark when the METPV data says it's bright. This is what caused the earlier crashes.
+
 df = pd.read_csv(weather_file)
 df['DateTime'] = pd.to_datetime(df['DateTime'])
+# Fix: Localize to Tokyo time so pvlib doesn't assume UTC
+df['DateTime'] = df['DateTime'].dt.tz_localize('Asia/Tokyo')
 
 # Extract metadata
 lat = df['Latitude'].iloc[0]
@@ -39,9 +46,12 @@ print(f"Location: {lat:.3f}N, {lon:.3f}E, {elev:.1f}m")
 print("\n[Calculating DNI using pvlib...]")
 import pvlib
 location = pvlib.location.Location(lat, lon, tz='Asia/Tokyo')
-solar_pos = location.get_solarposition(df['DateTime'])
+# Use Middle of the hour for alignment with measured data
+times_mid = df['DateTime'] + pd.Timedelta(minutes=30)
+solar_pos = location.get_solarposition(times_mid)
 
 zenith = solar_pos['zenith'].values
+print(f"Debug: Zenith at {df['DateTime'].iloc[12]} is {zenith[12]:.2f} deg")
 cos_zenith = np.cos(np.radians(zenith))
 ghi = df['GHI'].values
 dhi = df['DHI'].values
@@ -83,16 +93,18 @@ def run_pcs_simulation(name, count, dc_kw, ac_kw):
     system.SystemDesign.inv_eff = 98.4
     system.SystemDesign.losses = 5.0
     system.SystemDesign.tilt = 20
-    system.SystemDesign.azimuth = 185
-    system.SystemDesign.gcr = 0.81
+    system.SystemDesign.azimuth = 185 
     
-    # Temperature coefficient if possible (PVWatts v8 has gamma_pdc in SystemDesign/Module)
-    # Check if gamma_pdc exists in this version's PVWatts
+    # NOTE: For "Fixed" systems, PVWatts completely ignores GCR attribute.
+    # system.SystemDesign.gcr = 0.81
+    
+    # Temperature coefficient if possible
     try:
         system.SystemDesign.module_type = 0 # Standard
-        # PVWatts v8 uses a fixed 0.4%/C for module_type=0
-        # If we want -0.004 explicitly:
-        # system.SystemDesign.gamma_pdc = -0.4 # %/C
+        # NOTE: Pvwattsv8 SystemDesign attribute 'gamma_pdc' is often restricted 
+        # based on module_type. In previous attempts, this attribute was not modifiable.
+        if hasattr(system.SystemDesign, 'gamma_pdc'):
+            system.SystemDesign.gamma_pdc = -0.4 
     except: pass
 
     system.SolarResource.solar_resource_data = weather_data
@@ -131,6 +143,6 @@ for i, m in enumerate(months):
 
 # Save detailed results
 monthly_ac_df = pd.DataFrame({'Month': months, 'AC_Energy_kWh': monthly_ac.values})
-monthly_ac_df.to_csv("pure_pysam_results_granular.csv", index=False)
+monthly_ac_df.to_csv(r"D:\VS_CODE\Infiswift\metpv_11_automation\pure_pysam_results_granular.csv", index=False)
 print("\nResults saved to pure_pysam_results_granular.csv")
 print("="*70)
