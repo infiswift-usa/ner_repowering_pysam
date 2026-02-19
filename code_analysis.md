@@ -1,5 +1,5 @@
-D:\VS_CODE\Infiswift\metpv_11_automation\run_pvlib_metpv11.py
-
+\metpv_11_automation\run_pvlib_metpv11.py
+======================================================================
 **PVLIB SIMULATION - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
 
 Debug - First day mid-day values:
@@ -29,9 +29,10 @@ Monthly Production (kWh):
   Dec:   86,927 kWh
 
 Results saved to metpv11_pvlib_results.csv
-======================================================================
 
-"D:\VS_CODE\Infiswift\metpv_11_automation\run_pvlib_metpv11_with_modes.py"
+
+\metpv_11_automation\run_pvlib_metpv11_with_modes.py
+======================================================================
 
 **PVLIB SIMULATION *WITH MODES* - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
 
@@ -61,9 +62,8 @@ Monthly Production (kWh):
 
 Results saved to metpv11_pvlib_results.csv
 
+\metpv_11_automation\run_pvlib_metpv11_with_modes.py 
 ======================================================================
-
-"D:\VS_CODE\Infiswift\metpv_11_automation\run_pvlib_metpv11_with_modes.py"   
 
 **PVLIB SIMULATION *WITH MODES* - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
 
@@ -93,8 +93,9 @@ Monthly Production (kWh):
   Dec:   92,459 kWh
 
 Results saved to metpv11_pvlib_results.csv
-======================================================================
 
+\metpv_11_automation\run_pvlib_metpv11_with_modes.py 
+======================================================================
 **PVLIB SIMULATION *WITH MODES* - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
 
 [Mode: LEVEL_3] Calculating Bifacial POA (Infinite Sheds)...
@@ -123,8 +124,9 @@ Monthly Production (kWh):
   Dec:   87,572 kWh
 
 Results saved to metpv11_pvlib_results.csv
-======================================================================
 
+\metpv_11_automation\run_pysam_metpv11.py 
+======================================================
 **PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL METPV-11 CORRECTED DATA**
 
 Weather Data: 8760 hours
@@ -158,6 +160,45 @@ Monthly Production (kWh):
   Dec:   96,760 kWh
 
 Results saved to metpv11_pysam_results.csv
+
+\metpv_20_automation\run_pure_pysam.py 
+============================================
+**METPV-20 DATA**
+PURE PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL
+USING HORIZONTAL METPV WEATHER DATA
+
+
+Weather Data: 8760 hours
+Location: 34.856N, 136.452E, 70.0m
+
+[Calculating DNI using pvlib...]
+Debug: Zenith at 2016-01-01 12:00:00+09:00 is 58.42 deg
+
+Simulating Group A (PCS 01-04): 4 units x 140.0kW DC / 100.0kW AC
+
+Simulating Group B (PCS 05-09): 5 units x 130.0kW DC / 95.0kW AC
+
+FINAL RESULTS (9-PCS GRANULAR MODEL)
+
+Annual AC Energy: 1,612,803 kWh
+
+Monthly Production (kWh):
+  Jan:  119,251 kWh
+  Feb:  119,655 kWh
+  Mar:  155,448 kWh
+  Apr:  148,512 kWh
+  May:  168,389 kWh
+  Jun:  131,621 kWh
+  Jul:  146,972 kWh
+  Aug:  160,755 kWh
+  Sep:  129,103 kWh
+  Oct:  121,013 kWh
+  Nov:  106,724 kWh
+  Dec:  105,361 kWh
+
+Results saved to pure_pysam_results_granular.csv
+
+.
 ======================================================================
 
 1. The Discrepancy explained:
@@ -200,38 +241,3 @@ Corrected GCR:
 .
 ======================================================================
 
-**METPV-20 DATA**
-PURE PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL
-USING HORIZONTAL METPV WEATHER DATA
-
-
-Weather Data: 8760 hours
-Location: 34.856N, 136.452E, 70.0m
-
-[Calculating DNI using pvlib...]
-Debug: Zenith at 2016-01-01 12:00:00+09:00 is 58.42 deg
-
-Simulating Group A (PCS 01-04): 4 units x 140.0kW DC / 100.0kW AC
-
-Simulating Group B (PCS 05-09): 5 units x 130.0kW DC / 95.0kW AC
-
-FINAL RESULTS (9-PCS GRANULAR MODEL)
-
-Annual AC Energy: 1,612,803 kWh
-
-Monthly Production (kWh):
-  Jan:  119,251 kWh
-  Feb:  119,655 kWh
-  Mar:  155,448 kWh
-  Apr:  148,512 kWh
-  May:  168,389 kWh
-  Jun:  131,621 kWh
-  Jul:  146,972 kWh
-  Aug:  160,755 kWh
-  Sep:  129,103 kWh
-  Oct:  121,013 kWh
-  Nov:  106,724 kWh
-  Dec:  105,361 kWh
-
-Results saved to pure_pysam_results_granular.csv
-======================================================================
