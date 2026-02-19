@@ -49,7 +49,7 @@ if SIM_MODE in ['LEVEL_1', 'LEVEL_2']:
     HUB_HEIGHT = 10.0 # High clearance (Idealized)
 else:
     GCR = 0.326      # Realistic row spacing
-    HUB_HEIGHT = 1.0  # Realistic ground clearance (Assumption)
+    HUB_HEIGHT = 1.2  # Realistic ground clearance (Assumption)
 
 PITCH = MODULE_LENGTH / GCR
 ENABLE_BIFACIAL = (SIM_MODE != 'LEVEL_1')
