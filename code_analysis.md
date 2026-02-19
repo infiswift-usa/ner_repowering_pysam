@@ -12,7 +12,7 @@ DNI: 673.69 W/m2
 
 Running pvlib ModelChain for 9 systems...
 
-======================================================================
+
 FINAL RESULTS (PVLIB WORKFLOW)
 ======================================================================
 Annual AC Energy: 1,386,744 kWh
@@ -47,6 +47,7 @@ Total POA: 652.20 W/m2
 Running pvlib ModelChain for 9 systems...
 
 ======================================================================
+
 FINAL RESULTS (PVLIB WORKFLOW)
 ======================================================================
 Annual AC Energy: 1,352,112 kWh
@@ -66,7 +67,9 @@ Monthly Production (kWh):
   Dec:   82,286 kWh
 
 Results saved to metpv11_pvlib_results.csv
+
 ======================================================================
+
 "D:\VS_CODE\Infiswift\metpv_11_automation\run_pvlib_metpv11_with_modes.py"   
 
 PVLIB SIMULATION - 9-PCS GRANULAR MODEL
@@ -81,6 +84,7 @@ Total POA: 725.60 W/m2
 Running pvlib ModelChain for 9 systems...
 
 ======================================================================
+
 FINAL RESULTS (PVLIB WORKFLOW)
 ======================================================================
 Annual AC Energy: 1,547,818 kWh
@@ -102,6 +106,7 @@ Monthly Production (kWh):
 Results saved to metpv11_pvlib_results.csv
 ======================================================================
 ======================================================================
+
 PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL
 METPV-11 CORRECTED DATA
 ======================================================================
@@ -117,6 +122,7 @@ Simulating Group A (PCS 01-04): 4 units x 140.0kW DC / 100.0kW AC
 Simulating Group B (PCS 05-09): 5 units x 130.0kW DC / 95.0kW AC
 
 ======================================================================
+
 FINAL RESULTS
 ======================================================================
 Annual AC Energy: 1,499,135 kWh
@@ -162,6 +168,7 @@ Hub Height (1.5m): This is the height of the module center from the ground.
 This value is needed for the "Infinite Sheds" model to calculate how much ground-reflected light reaches the back side.
 
 ======================================================================
+
 **METPV-20 DATA**
 PURE PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL
 USING HORIZONTAL METPV WEATHER DATA
@@ -178,6 +185,7 @@ Simulating Group A (PCS 01-04): 4 units x 140.0kW DC / 100.0kW AC
 Simulating Group B (PCS 05-09): 5 units x 130.0kW DC / 95.0kW AC
 
 ======================================================================
+
 FINAL RESULTS (9-PCS GRANULAR MODEL)
 ======================================================================
 Annual AC Energy: 1,612,803 kWh
