@@ -32,7 +32,7 @@ SURFACE_AZIMUTH = 185
 # 'LEVEL_1': Mono-facial, Idealized (No bifacial, No shading) -> Target: ~1.5M kWh
 # 'LEVEL_2': Bifacial, Idealized (Bifacial gain, No shading)   -> Target: ~1.6M kWh
 # 'LEVEL_3': Bifacial, Realistic (Bifacial gain + Shading)      -> Target: ~1.29M kWh
-SIM_MODE = 'LEVEL_2'
+SIM_MODE = 'LEVEL_3'
 
 # Hardware Parameters (from NER132M625E-NGD Datasheet)
 MODULE_PARAMS_PVWATTS = {
@@ -48,8 +48,8 @@ if SIM_MODE in ['LEVEL_1', 'LEVEL_2']:
     GCR = 0.01      # Effectively Zero shading (MAXIFIT Baseline)
     HUB_HEIGHT = 10.0 # High clearance (Idealized)
 else:
-    GCR = 0.81      # Realistic row spacing
-    HUB_HEIGHT = 1.5  # Realistic ground clearance (Assumption)
+    GCR = 0.326      # Realistic row spacing
+    HUB_HEIGHT = 1.0  # Realistic ground clearance (Assumption)
 
 PITCH = MODULE_LENGTH / GCR
 ENABLE_BIFACIAL = (SIM_MODE != 'LEVEL_1')

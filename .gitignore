@@ -6,7 +6,6 @@ env/
 
 # Ignore pypvcell and other unrelated folders
 pypvcell/
-demo-automation.py
 
 # Ignore large data files (optional - comment out if you want them tracked)
 # *.csv
