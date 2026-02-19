@@ -143,6 +143,6 @@ for i, m in enumerate(months):
 
 # Save detailed results
 monthly_ac_df = pd.DataFrame({'Month': months, 'AC_Energy_kWh': monthly_ac.values})
-monthly_ac_df.to_csv(r"D:\VS_CODE\Infiswift\metpv_11_automation\pure_pysam_results_granular.csv", index=False)
+monthly_ac_df.to_csv(r"D:\VS_CODE\Infiswift\metpv_20_automation\pure_pysam_results_granular.csv", index=False)
 print("\nResults saved to pure_pysam_results_granular.csv")
 print("="*70)

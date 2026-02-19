@@ -1,0 +1,26 @@
+# Ignore virtual environments
+venv312/
+venv/
+.venv/
+env/
+
+# Ignore pypvcell and other unrelated folders
+pypvcell/
+demo-automation.py
+metpv_automation.zip
+
+# Ignore large data files (optional - comment out if you want them tracked)
+# *.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
