@@ -1,8 +1,6 @@
 D:\VS_CODE\Infiswift\metpv_11_automation\run_pvlib_metpv11.py
 
-PVLIB SIMULATION - 9-PCS GRANULAR MODEL
-USING METPV-11 CLEANED DATA
-======================================================================
+**PVLIB SIMULATION - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
 
 Debug - First day mid-day values:
 Time: 2016-01-01 12:00:00+09:00
@@ -12,9 +10,8 @@ DNI: 673.69 W/m2
 
 Running pvlib ModelChain for 9 systems...
 
-
 FINAL RESULTS (PVLIB WORKFLOW)
-======================================================================
+
 Annual AC Energy: 1,386,744 kWh
 
 Monthly Production (kWh):
@@ -36,9 +33,7 @@ Results saved to metpv11_pvlib_results.csv
 
 "D:\VS_CODE\Infiswift\metpv_11_automation\run_pvlib_metpv11_with_modes.py"
 
-PVLIB SIMULATION - 9-PCS GRANULAR MODEL
-USING METPV-11 CLEANED DATA
-======================================================================
+**PVLIB SIMULATION *WITH MODES* - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
 
 [Mode: LEVEL_1] Calculating Mono-facial POA (Standard)...
 Debug Values at Mid-Day:
@@ -46,10 +41,8 @@ Total POA: 652.20 W/m2
 
 Running pvlib ModelChain for 9 systems...
 
-======================================================================
-
 FINAL RESULTS (PVLIB WORKFLOW)
-======================================================================
+
 Annual AC Energy: 1,352,112 kWh
 
 Monthly Production (kWh):
@@ -72,9 +65,7 @@ Results saved to metpv11_pvlib_results.csv
 
 "D:\VS_CODE\Infiswift\metpv_11_automation\run_pvlib_metpv11_with_modes.py"   
 
-PVLIB SIMULATION - 9-PCS GRANULAR MODEL
-USING METPV-11 CLEANED DATA
-======================================================================
+**PVLIB SIMULATION *WITH MODES* - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
 
 [Mode: LEVEL_2] Calculating Bifacial POA (Infinite Sheds)...
 Bifacial Gain Applied: 80% with Albedo 0.2
@@ -83,10 +74,8 @@ Total POA: 725.60 W/m2
 
 Running pvlib ModelChain for 9 systems...
 
-======================================================================
-
 FINAL RESULTS (PVLIB WORKFLOW)
-======================================================================
+
 Annual AC Energy: 1,547,818 kWh
 
 Monthly Production (kWh):
@@ -105,11 +94,38 @@ Monthly Production (kWh):
 
 Results saved to metpv11_pvlib_results.csv
 ======================================================================
+
+**PVLIB SIMULATION *WITH MODES* - 9-PCS GRANULAR MODEL USING METPV-11 CLEANED DATA**
+
+[Mode: LEVEL_3] Calculating Bifacial POA (Infinite Sheds)...
+Bifacial Gain Applied: 80% with Albedo 0.2
+Debug Values at Mid-Day:
+Total POA: 690.22 W/m2
+
+Running pvlib ModelChain for 9 systems...
+
+FINAL RESULTS (PVLIB WORKFLOW)
+
+Annual AC Energy: 1,468,802 kWh
+
+Monthly Production (kWh):
+  Jan:   89,656 kWh
+  Feb:  108,133 kWh
+  Mar:  145,330 kWh
+  Apr:  144,239 kWh
+  May:  157,023 kWh
+  Jun:  119,930 kWh
+  Jul:  139,666 kWh
+  Aug:  148,479 kWh
+  Sep:  117,335 kWh
+  Oct:  116,281 kWh
+  Nov:   95,158 kWh
+  Dec:   87,572 kWh
+
+Results saved to metpv11_pvlib_results.csv
 ======================================================================
 
-PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL
-METPV-11 CORRECTED DATA
-======================================================================
+**PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL METPV-11 CORRECTED DATA**
 
 Weather Data: 8760 hours
 Location: 34.870N, 136.453E, 70.0m
@@ -121,10 +137,8 @@ Simulating Group A (PCS 01-04): 4 units x 140.0kW DC / 100.0kW AC
 
 Simulating Group B (PCS 05-09): 5 units x 130.0kW DC / 95.0kW AC
 
-======================================================================
-
 FINAL RESULTS
-======================================================================
+
 Annual AC Energy: 1,499,135 kWh
 LATEST MAXIFIT Target: 1,535,110 kWh
 Difference:            -35,975 kWh (-2.3%)
@@ -145,15 +159,15 @@ Monthly Production (kWh):
 
 Results saved to metpv11_pysam_results.csv
 ======================================================================
+
 1. The Discrepancy explained:
-run_pvlib_metpv11 copy.py (1,352k kWh): This script uses the Mid-Hour Position (e.g., 12:30). This is the industry standard for hourly data like METPV because 12:30 represents the "average" sun angle for the entire hour of 12:00–13:00.
+run_pvlib_metpv11_with_modes.py - LEVEL1 - (1,352k kWh): This script uses the Mid-Hour Position (e.g., 12:30). This is the industry standard for hourly data like METPV because 12:30 represents the "average" sun angle for the entire hour of 12:00–13:00.
 run_pvlib_metpv11.py (1,386k kWh): In your manual edits, you switched back to mc.run_model(weather). This function calculates the sun position at the Top-of-the-Hour (e.g., 12:00, 13:00).
 
-2. Why the "Copy" is more:
 METPV irradiation is an accumulation of energy over 60 minutes. If you calculate the sun's power at exactly 12:00 (when it's lower), it doesn't represent the energy received during the rest of the hour. By using the angle at 12:30, we get a much better average of the sun's intensity for that data block.
 
-The Problem with Bifaciality
-To calculate the bifacial "bonus," the physics engine needs to know how high the panels are (Hub Height) and how reflective the ground is (Albedo). Since these aren't in any of the config files, I used industry standard defaults (1.5m and 0.2).
+2. Bifaciality
+To calculate the bifacial "bonus," the physics engine needs to know how high the panels are (Hub Height) and how reflective the ground is (Albedo). Since albedo isn't in any of the config files, it was assumed as 0.2.
 
 Albedo and Hub height are engineering assumptions made to enable the Bifacial IR model because those specific site-design details aren't in the module/inverter datasheets.
 
@@ -163,16 +177,33 @@ Albedo (0.2): This is the industry standard default for grass or standard soil.
 
 If the site has white gravel, this should be 0.3 - 0.4 (which would increase yield). If it's dark soil, it might be 0.15.
 
-Hub Height (1.5m): This is the height of the module center from the ground.
+Hub Height (1.2m): This is the height of the module center from the ground.
 
 This value is needed for the "Infinite Sheds" model to calculate how much ground-reflected light reaches the back side.
 
+Corrected values from the drawing:
+Parameter                  Value
+Bottom clearance     800 mm = 0.8 m
+Row pitch            7300 mm = 7.3 m
+Module tilt          20°
+Module length        2382mm
+
+Corrected Hub Height calculation:
+Module center height = 800mm + (2382mm × sin(20°) / 2)
+= 800 + (2382 × 0.342 / 2)
+= 800 + 407mm
+= ~1207mm ≈ 1.2m
+
+Corrected GCR:
+2.382 / 7.3 = 0.326
+
+.
 ======================================================================
 
 **METPV-20 DATA**
 PURE PYSAM SIMULATION (PVWATTS V8) - 9-PCS GRANULAR MODEL
 USING HORIZONTAL METPV WEATHER DATA
-======================================================================
+
 
 Weather Data: 8760 hours
 Location: 34.856N, 136.452E, 70.0m
@@ -184,10 +215,8 @@ Simulating Group A (PCS 01-04): 4 units x 140.0kW DC / 100.0kW AC
 
 Simulating Group B (PCS 05-09): 5 units x 130.0kW DC / 95.0kW AC
 
-======================================================================
-
 FINAL RESULTS (9-PCS GRANULAR MODEL)
-======================================================================
+
 Annual AC Energy: 1,612,803 kWh
 
 Monthly Production (kWh):
