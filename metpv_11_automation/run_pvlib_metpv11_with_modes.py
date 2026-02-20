@@ -49,7 +49,7 @@ if SIM_MODE in ['LEVEL_1', 'LEVEL_2']:
     HUB_HEIGHT = 10.0 # High clearance (Idealized)
 else:
     GCR = 0.326      # Realistic row spacing
-    HUB_HEIGHT = 1.2  # Realistic ground clearance (Assumption)
+    HUB_HEIGHT = 1.2  # Realistic ground clearance
 
 PITCH = MODULE_LENGTH / GCR
 ENABLE_BIFACIAL = (SIM_MODE != 'LEVEL_1')
@@ -155,7 +155,6 @@ ac_plant = pd.Series(0.0, index=weather.index, dtype=float)
 
 print(f"\nRunning pvlib ModelChain for {len(systems)} systems...")
 for i, system in enumerate(systems):
-    # Boss's code uses ModelChain.with_pvwatts
     mc = ModelChain.with_pvwatts(system, location)
     # run_model_from_poa uses our pre-calculated bifacial global POA
     mc.run_model_from_poa(weather)
