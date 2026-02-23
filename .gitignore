@@ -3,8 +3,10 @@ venv312/
 venv/
 .venv/
 env/
+.env
 
 # Ignore pypvcell and other unrelated folders
+D:\VS_CODE\Infiswift\pypvcell/
 pypvcell/
 demo-automation.py
 metpv_automation.zip
