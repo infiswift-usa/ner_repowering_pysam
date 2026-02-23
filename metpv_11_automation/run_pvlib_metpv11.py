@@ -111,7 +111,6 @@ ac_plant = pd.Series(0.0, index=weather.index, dtype=float)
 
 print(f"\nRunning pvlib ModelChain for {len(systems)} systems...")
 for i, system in enumerate(systems):
-    # Boss's code uses ModelChain.with_pvwatts
     mc = ModelChain.with_pvwatts(system, location)
     # run_model calculates POA and then iterates through DC/AC models
     mc.run_model(weather)
