@@ -1,0 +1,86 @@
+{
+    "project_information": {
+        "project_name": "モジュール配置図_RP-0039-SL01-00_Mie Tsu",
+        "date": "2025.12.26",
+        "drawing_number": "RP-0039-SL01-00",
+        "scale": "1/600"
+    },
+    "module_specifications": {
+        "model_number": "NER132M625E-NGD",
+        "nominal_maximum_output_w": 625.0,
+        "nominal_max_power_operating_voltage_v": 41.69,
+        "nominal_max_power_operating_current_a": 14.99,
+        "nominal_open_circuit_voltage_v": 49.19,
+        "nominal_short_circuit_current_a": 16.19,
+        "weight_kg": 32.8,
+        "dimensions_mm": "2382x1134x30"
+    },
+    "azimuth_angle": "5 degrees West",
+    "area_breakdown": [
+        {
+            "area_name": "Main Project Area",
+            "pcs_groups": [
+                {
+                    "group_name": "PCS 01～04 (4台)",
+                    "pcs_model": "SG100CX-JP (三相3線100.0kW)",
+                    "modules_per_pcs": 224,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 14,
+                    "module_output_kw": 140.0,
+                    "pcs_output_kw": 100.0
+                },
+                {
+                    "group_name": "PCS 05～09 (5台)",
+                    "pcs_model": "SG100CX-JP (三相3線100.0kW)",
+                    "modules_per_pcs": 208,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 13,
+                    "module_output_kw": 130.0,
+                    "pcs_output_kw": 95.0
+                }
+            ],
+            "tilt_angle": 20.0,
+            "total_modules": 1936,
+            "total_module_output_kw": 1210.0,
+            "total_system_output_kw": 875.0
+        }
+    ],
+    "rack_configurations": [
+        {
+            "config_rows": "4",
+            "config_columns": "8",
+            "color_in_diagram": "red",
+            "unit_count": 53,
+            "width_mm": 19126.0,
+            "pitch": 7300.0,
+            "length_mm": 4319.0
+        },
+        {
+            "config_rows": "4",
+            "config_columns": "4",
+            "color_in_diagram": "blue",
+            "unit_count": 15,
+            "width_mm": 9558.0,
+            "pitch": 7300.0,
+            "length_mm": 4319.0
+        }
+    ],
+    "rack_profile_measurements": {
+        "max_height_mm": 2372.0
+    },
+    "diagram_notes": [
+        "Created based on aerial photography.",
+        "Designed on the assumption that the land is flat and can be installed on the entire surface.",
+        "Winter solstice shadow lines may differ from reality.",
+        "Capacity may change after land development survey.",
+        "Detailed rack specifications will be determined after detailed on-site investigation.",
+        "This drawing is for business negotiations and does not guarantee installation capacity or power generation.",
+        "The layout of equipment installation locations is subject to change."
+    ],
+    "additional_findings": {
+        "pcs_output_limit_note": "PCS 05-09 are assumed to have an output limit of 95.00kW.",
+        "ground_clearance_mm": 800,
+        "rack_vertical_rise_mm": 1572,
+        "row_spacing_mm": 2981
+    }
+}

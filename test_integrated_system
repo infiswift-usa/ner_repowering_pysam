@@ -1,0 +1,141 @@
+import os
+import json
+import re
+import pandas as pd
+import numpy as np
+import pvlib
+from pathlib import Path
+from pvlib.modelchain import ModelChain
+from pvlib.pvsystem import Array, FixedMount, PVSystem
+from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
+
+# ==========================================
+# SIMULATOR CORE LOGIC (BOSS ALIGNED)
+# ==========================================
+
+def get_site_config(extracted_json):
+    """Maps project name to coordinates and normalizes azimuth."""
+    # Mapping based on project name
+    SITE_LOOKUP = {
+        "Mie Tsu": {"lat": 34.856, "lon": 136.452},
+        "Mie Fukuo": {"lat": 34.856, "lon": 136.452}
+    }
+    project_name = extracted_json["project_information"]["project_name"]
+    coords = SITE_LOOKUP.get(project_name, {"lat": 34.856, "lon": 136.452})
+    
+    # Azimuth: 180 (South) + 5 (West) = 185
+    az_str = extracted_json.get("azimuth_angle", "0 degrees")
+    azimuth = 180.0
+    val_match = re.search(r"(\d+)", az_str)
+    offset = float(val_match.group(1)) if val_match else 0.0
+    
+    if "West" in az_str:
+        azimuth += offset
+    elif "East" in az_str:
+        azimuth -= offset
+    #azimuth=185 for kameyama
+    return coords, azimuth
+
+def build_systems_from_json(extracted_json, azimuth):
+    """Constructs PVSystems with dynamic PDC0 and constant 0.984 efficiency."""
+    temp_params = TEMPERATURE_MODEL_PARAMETERS["sapm"]["open_rack_glass_glass"]
+    mod_spec = extracted_json["module_specifications"]
+    module_params = {
+        "pdc0": mod_spec["nominal_maximum_output_w"],
+        "gamma_pdc": -0.0029  # standard spec
+    }
+    
+    systems = []
+    for area in extracted_json["area_breakdown"]:
+        # Uses per-area tilt extracted from JSON
+        mount = FixedMount(surface_tilt=area["tilt_angle"], surface_azimuth=azimuth)
+        
+        for group in area["pcs_groups"]:
+            # Parse unit count (e.g., "4台")
+            num_units = int(re.search(r"(\d+)台", group["group_name"]).group(1))
+            
+            # Match original simulation parameters
+            # pdc0 = DC input rating (module output kw * 1000)
+            # eta_inv_nom = 0.984 (fixed conversion efficiency)
+            dynamic_pdc0 = group["module_output_kw"] * 1000
+            target_efficiency = 0.984
+            
+            array = Array(
+                mount=mount,
+                module_parameters=module_params,
+                modules_per_string=group["modules_in_series"],
+                strings=group["strings_per_pcs"],
+                temperature_model_parameters=temp_params,
+            )
+            
+            for _ in range(num_units):
+                systems.append(PVSystem(
+                    arrays=[array], 
+                    inverter_parameters={"pdc0": dynamic_pdc0, "eta_inv_nom": target_efficiency}
+                ))
+    return systems
+
+def run_plant_simulation(df_weather, systems, location):
+    """Performs Zenith-based DNI correction and runs ModelChain."""
+    # Midpoint of hour for solar position
+    times_mid = df_weather.index + pd.Timedelta(minutes=30)
+    solar_pos = location.get_solarposition(times_mid)
+    zenith = solar_pos['zenith'].values
+    cos_zenith = np.cos(np.radians(zenith))
+
+    # DNI = Direct Horizontal / cos(Zenith)
+    weather = pd.DataFrame(index=df_weather.index)
+    weather['ghi'] = df_weather['GHI']
+    weather['dhi'] = df_weather['DHI']
+    weather['dni'] = (df_weather['DNI_horiz'] / cos_zenith).fillna(0).clip(0, 1500)
+    weather['temp_air'] = df_weather['Temperature']
+    weather['wind_speed'] = df_weather['WindSpeed']
+
+    ac_plant = pd.Series(0.0, index=weather.index, dtype=float)
+    for system in systems:
+        mc = ModelChain.with_pvwatts(system, location)
+        mc.run_model(weather)
+        ac_plant = ac_plant.add(mc.results.ac, fill_value=0)
+
+    return ac_plant
+
+# ==========================================
+# MAIN TEST CALL
+# ==========================================
+if __name__ == "__main__":
+    # Update these paths to your actual locations
+    json_path = r"D:\VS_CODE\Infiswift\Mie Tsu_extracted.json"
+    weather_csv = r"D:\VS_CODE\Infiswift\metpv_11_automation\metpv11_clean_v2.csv"
+    output_path = Path(r"D:\VS_CODE\Infiswift")
+
+    if os.path.exists(json_path):
+        # 1. Load the JSON directly from the path
+        with open(json_path, "r", encoding="utf-8") as f:
+            extracted_json = json.load(f)
+        
+        # 2. Config & Location setup
+        coords, azimuth = get_site_config(extracted_json)
+        location = pvlib.location.Location(coords['lat'], coords['lon'], tz="Asia/Tokyo")
+        
+        # 3. Build systems using hardware logic (4x100kW + 5x95kW)
+        systems = build_systems_from_json(extracted_json, azimuth)
+        
+        # 4. Load Weather data
+        df_raw = pd.read_csv(weather_csv)
+        df_raw['DateTime'] = pd.to_datetime(df_raw['DateTime'])
+        df_raw.set_index('DateTime', inplace=True)
+        df_raw.index = df_raw.index.tz_localize('Asia/Tokyo')
+        
+        # 5. Execute simulation 
+        ac_output = run_plant_simulation(df_raw, systems, location)
+        
+        # 6. Summary and Save results
+        monthly_kwh = ac_output.resample("ME").sum() / 1000
+        yearly_kwh = ac_output.sum() / 1000
+        print(f"\n--- Simulation Results for: {extracted_json['project_information']['project_name']} ---")
+        print(monthly_kwh.to_string())
+        print(f"Annual AC Energy: {yearly_kwh:,.0f} kWh")
+        
+        #monthly_kwh.to_csv(output_path / "integrated_test_results.csv")
+    else:
+        print(f"Error: JSON file not found at {json_path}")

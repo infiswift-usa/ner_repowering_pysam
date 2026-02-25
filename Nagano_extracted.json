@@ -1,0 +1,90 @@
+{
+    "project_information": {
+        "project_name": "Nagano",
+        "date": "26.01.05",
+        "drawing_number": "RP-0042-SL01-00",
+        "scale": "1/400"
+    },
+    "module_specifications": {
+        "model_number": "NER132M625E-NGD",
+        "nominal_maximum_output_w": 625.0,
+        "nominal_max_power_operating_voltage_v": 41.69,
+        "nominal_max_power_operating_current_a": 14.99,
+        "nominal_open_circuit_voltage_v": 49.19,
+        "nominal_short_circuit_current_a": 16.19,
+        "weight_kg": 32.8,
+        "dimensions_mm": "2382x1134x30"
+    },
+    "azimuth_angle": "11 degrees West",
+    "area_breakdown": [
+        {
+            "area_name": "Main Project Area",
+            "pcs_groups": [
+                {
+                    "group_name": "PCS 01 (1台)",
+                    "pcs_model": "SG100CX-JP (三相3線100.0kW)",
+                    "modules_per_pcs": 192,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 12,
+                    "module_output_kw": 120.0,
+                    "pcs_output_kw": 90.0
+                },
+                {
+                    "group_name": "PCS 02,03 (2台)",
+                    "pcs_model": "SG100CX-JP (三相3線100.0kW)",
+                    "modules_per_pcs": 176,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 11,
+                    "module_output_kw": 110.0,
+                    "pcs_output_kw": 90.0
+                }
+            ],
+            "tilt_angle": 20.0,
+            "total_modules": 544,
+            "total_module_output_kw": 340.0,
+            "total_system_output_kw": 270.0
+        }
+    ],
+    "rack_configurations": [
+        {
+            "config_rows": "4",
+            "config_columns": "8",
+            "color_in_diagram": "red",
+            "unit_count": 12,
+            "width_mm": 19126.0,
+            "pitch": 7500.0,
+            "length_mm": 4319.0
+        },
+        {
+            "config_rows": "4",
+            "config_columns": "6",
+            "color_in_diagram": "green",
+            "unit_count": 2,
+            "width_mm": 14342.0,
+            "pitch": 7500.0,
+            "length_mm": 4319.0
+        },
+        {
+            "config_rows": "4",
+            "config_columns": "4",
+            "color_in_diagram": "blue",
+            "unit_count": 7,
+            "width_mm": 9558.0,
+            "pitch": 7500.0,
+            "length_mm": 4319.0
+        }
+    ],
+    "rack_profile_measurements": {
+        "max_height_mm": 2372.0
+    },
+    "diagram_notes": [
+        "Created based on received materials and aerial photographs.",
+        "Designed on the premise that it can be installed entirely on flat land.",
+        "Winter solstice shadow lines may differ from actual measurements.",
+        "Please note that capacity may change after site preparation surveys.",
+        "Detailed specifications for the racks will be determined after on-site detailed investigation.",
+        "This drawing pertains to adjacent land and does not guarantee equipment capacity or power generation.",
+        "The layout of equipment installation locations may change."
+    ],
+    "additional_findings": {}
+}

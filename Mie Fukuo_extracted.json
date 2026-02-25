@@ -1,0 +1,140 @@
+{
+    "project_information": {
+        "project_name": "モジュール配置図_RP-0007-SL03-00_Mie Fukuo",
+        "date": "2025.05.16",
+        "drawing_number": "RP-0007-SL03-00",
+        "scale": "1/1000"
+    },
+    "module_specifications": {
+        "model_number": "RSM132-8-730BHDG",
+        "nominal_maximum_output_w": 730.0,
+        "nominal_max_power_operating_voltage_v": 42.2,
+        "nominal_max_power_operating_current_a": 17.32,
+        "nominal_open_circuit_voltage_v": 50.33,
+        "nominal_short_circuit_current_a": 18.38,
+        "weight_kg": 37.5,
+        "dimensions_mm": "2384x1303x33"
+    },
+    "azimuth_angle": "West (no degree mentioned)",
+    "area_breakdown": [
+        {
+            "area_name": "エリア1",
+            "pcs_groups": [
+                {
+                    "group_name": "PCS 01~06(6台)",
+                    "pcs_model": "SUN2000-50KTL-NHK3 (三相3線50.0kW)",
+                    "modules_per_pcs": 96,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 6,
+                    "module_output_kw": 70.08,
+                    "pcs_output_kw": 50.0
+                },
+                {
+                    "group_name": "PCS 07~10(4台)",
+                    "pcs_model": "SUN2000-50KTL-NHK3 (三相3線50.0kW)",
+                    "modules_per_pcs": 80,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 5,
+                    "module_output_kw": 58.4,
+                    "pcs_output_kw": 50.0
+                }
+            ],
+            "tilt_angle": 20.0,
+            "total_modules": 896,
+            "total_module_output_kw": 654.08,
+            "total_system_output_kw": 500.0
+        },
+        {
+            "area_name": "エリア2",
+            "pcs_groups": [
+                {
+                    "group_name": "PCS 11~18(8台)",
+                    "pcs_model": "SUN2000-50KTL-NHK3 (三相3線50.0kW)",
+                    "modules_per_pcs": 96,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 6,
+                    "module_output_kw": 70.08,
+                    "pcs_output_kw": 50.0
+                },
+                {
+                    "group_name": "PCS 19~31(13台)",
+                    "pcs_model": "SUN2000-50KTL-NHK3 (三相3線50.0kW)",
+                    "modules_per_pcs": 80,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 5,
+                    "module_output_kw": 58.4,
+                    "pcs_output_kw": 50.0
+                }
+            ],
+            "tilt_angle": 10.0,
+            "total_modules": 1808,
+            "total_module_output_kw": 1319.84,
+            "total_system_output_kw": 1050.0
+        },
+        {
+            "area_name": "エリア3",
+            "pcs_groups": [
+                {
+                    "group_name": "PCS 32(1台)",
+                    "pcs_model": "SUN2000-50KTL-NHK3 (三相3線50.0kW)",
+                    "modules_per_pcs": 96,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 6,
+                    "module_output_kw": 70.08,
+                    "pcs_output_kw": 50.0
+                },
+                {
+                    "group_name": "PCS 33~35(3台)",
+                    "pcs_model": "SUN2000-50KTL-NHK3 (三相3線50.0kW)",
+                    "modules_per_pcs": 80,
+                    "modules_in_series": 16,
+                    "strings_per_pcs": 5,
+                    "module_output_kw": 58.4,
+                    "pcs_output_kw": 50.0
+                }
+            ],
+            "tilt_angle": 20.0,
+            "total_modules": 336,
+            "total_module_output_kw": 245.28,
+            "total_system_output_kw": 200.0
+        }
+    ],
+    "rack_configurations": [
+        {
+            "config_rows": "4",
+            "config_columns": "8",
+            "color_in_diagram": "red",
+            "unit_count": 43,
+            "width_mm": 19142.0,
+            "pitch": 6250.0,
+            "length_mm": 4954.0
+        },
+        {
+            "config_rows": "4",
+            "config_columns": "6",
+            "color_in_diagram": "blue",
+            "unit_count": 34,
+            "width_mm": 14354.0,
+            "pitch": 6250.0,
+            "length_mm": 4954.0
+        },
+        {
+            "config_rows": "4",
+            "config_columns": "4",
+            "color_in_diagram": "purple",
+            "unit_count": 53,
+            "width_mm": 9566.0,
+            "pitch": 6250.0,
+            "length_mm": 4954.0
+        }
+    ],
+    "rack_profile_measurements": null,
+    "diagram_notes": [
+        "Created based on survey map.",
+        "Area 1 and 3 are arranged with an array angle of 20 degrees.",
+        "Area 2 is arranged with an array angle of 10 degrees.",
+        "Winter solstice shadow lines may differ from reality.",
+        "This drawing is for business negotiations and does not guarantee installation capacity or power generation."
+    ],
+    "additional_findings": {}
+}

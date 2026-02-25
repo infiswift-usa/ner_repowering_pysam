@@ -25,7 +25,8 @@ import pvlib
 from pvlib.modelchain import ModelChain
 from pvlib.pvsystem import Array, FixedMount, PVSystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
-
+from pvlib.bifacial import infinite_sheds
+SIM_MODE = 'LEVEL_2'
 # ==========================================
 # STRICT PYDANTIC SCHEMAS (JSON Structure)
 # ==========================================
@@ -172,7 +173,6 @@ def extraction_node(state: ExtractionState):
                 - Only return 'X degrees West/East' if a specific number (like 5 or 11) is explicitly printed next to the compass or in the diagram notes.
                 - If the True North arrow is tilted slightly to the Left of the vertical crosshair, identify this as West. If it is tilted to the Right, identify it as East.
 
-            
             MARKDOWN EXTRACT:
             {state['raw_markdown']}"""
         }
@@ -279,29 +279,65 @@ def build_systems_from_json(extracted_json, azimuth):
 
 # --- Simulator Logic ---
 
-def run_plant_simulation(df_weather, systems, location):
-    """Aggregates AC power (W) across all individual PVSystems."""
-    # 1. Calculate Solar Position at midpoint of each hour
+def run_plant_simulation(df_weather, systems, location, extracted_json, azimuth):
+    """Aggregates AC power using advanced POA models (Bifacial/Shading)."""
+    # 1. Solar Position & DNI Correction
     times_mid = df_weather.index + pd.Timedelta(minutes=30)
     solar_pos = location.get_solarposition(times_mid)
+    solar_pos.index = df_weather.index
     zenith = solar_pos['zenith'].values
     cos_zenith = np.cos(np.radians(zenith))
 
-    # 2. Prepare PVLib compatible weather DataFrame
     weather = pd.DataFrame(index=df_weather.index)
     weather['ghi'] = df_weather['GHI']
     weather['dhi'] = df_weather['DHI']
-    # DNI = Direct Horizontal / cos(Zenith)
     weather['dni'] = (df_weather['DNI_horiz'] / cos_zenith).fillna(0).clip(0, 1500)
     weather['temp_air'] = df_weather['Temperature']
     weather['wind_speed'] = df_weather['WindSpeed']
 
-    # 3. Aggregate AC production
-    ac_plant = pd.Series(0.0, index=weather.index, dtype=float)
+    # 2. Geometry Retrieval (from JSON)
+    rack_cfg = extracted_json.get("rack_configurations", [{}])[0]
+    pitch_val = rack_cfg.get("pitch", 7300.0) / 1000 # 7300mm -> 7.3m
+    length_val = rack_cfg.get("length_mm", 4319.0) / 1000 # 4319mm -> 4.319m
+    # ==================================================
+    # in pvlib: length_val=2.382 and pitch_val=length_val/gcr
+    # ==================================================
+    # Bottom-to-Top total height (800 + 1572 = 2372)
+    h_max = (extracted_json.get("rack_profile_measurements") or {}).get("max_height_mm", 2372.0) / 1000
+    
+    # Mode Settings
+    gcr = length_val / pitch_val if SIM_MODE == 'LEVEL_3' else 0.01
+    #hub_height = h_max / 2 if SIM_MODE == 'LEVEL_3' else 10.0
+    hub_height = h_max / 2
+    tilt = extracted_json["area_breakdown"][0]["tilt_angle"]
+    
+    # 3. Calculate POA based on Mode
+    if SIM_MODE != 'LEVEL_1':
+        print(f"\n[Mode: {SIM_MODE}] Calculating Bifacial POA (Infinite Sheds)...")
+        bifacial_irrad = infinite_sheds.get_irradiance(
+            tilt, azimuth,
+            solar_pos['zenith'].values, solar_pos['azimuth'].values,
+            gcr, hub_height, pitch_val,
+            weather['ghi'].values, weather['dhi'].values, weather['dni'].values,
+            albedo=0.2, bifaciality=0.80, vectorize=True
+        )
+        weather['poa_global'] = bifacial_irrad['poa_global']
+        weather['poa_direct'] = bifacial_irrad['poa_front_direct']
+    else:
+        print(f"\n[Mode: {SIM_MODE}] Calculating Mono-facial POA (Standard)...")
+        poa = pvlib.irradiance.get_total_irradiance(tilt, azimuth, 
+                                                    solar_pos['zenith'], solar_pos['azimuth'], 
+                                                    weather['dni'], weather['ghi'], weather['dhi'])
+        weather['poa_global'] = poa['poa_global']
+        weather['poa_direct'] = poa['poa_direct']
 
+    weather['poa_diffuse'] = weather['poa_global'] - weather['poa_direct']
+
+    # 4. ModelChain Execution
+    ac_plant = pd.Series(0.0, index=weather.index, dtype=float)
     for system in systems:
         mc = ModelChain.with_pvwatts(system, location)
-        mc.run_model(weather)
+        mc.run_model_from_poa(weather) # Corrected to use pre-calculated POA
         ac_plant = ac_plant.add(mc.results.ac, fill_value=0)
 
     return ac_plant
@@ -310,9 +346,10 @@ def run_plant_simulation(df_weather, systems, location):
 # RUN
 # ==========================================
 if __name__ == "__main__":
-    pdf_file_path = r"C:\Users\ASUS\Downloads\モジュール配置図_RP-0007-SL03-00_Mie Fukuo.pdf"
+    pdf_file_path = r"C:\Users\ASUS\Downloads\モジュール配置図_RP-0039-SL01-00_Mie Tsu.pdf"
     weather_csv = r"D:\VS_CODE\Infiswift\metpv_11_automation\metpv11_clean_v2.csv"
     output_dir = Path(r"D:\VS_CODE\Infiswift")
+    
     if os.path.exists(pdf_file_path):
         initial_input = {
             "val_pdf_path": pdf_file_path,
@@ -322,46 +359,41 @@ if __name__ == "__main__":
             "error": ""
         }
         final_state = app.invoke(initial_input)
-        if final_state.get("error"):
-            print(f"Failed: {final_state['error']}")
-        else:
-            print("\n✅ Final Extracted JSON:")
-            print(json.dumps(final_state["structured_data"], indent=4, ensure_ascii=False))
-            extracted_json=final_state["structured_data"]
+        
+        if not final_state.get("error"):
+            extracted_json = final_state["structured_data"]
             project_name = extracted_json["project_information"]["project_name"]
 
+            # Save JSON to Infiswift path
             json_filename = output_dir / f"{project_name}_extracted.json"
             with open(json_filename, "w", encoding="utf-8") as f:
                 json.dump(extracted_json, f, indent=4, ensure_ascii=False)
-            print(f"✅ JSON saved to: {json_filename}")
+            
+            # Setup Simulation
             coords, azimuth = get_site_config(extracted_json)
             location = pvlib.location.Location(coords['lat'], coords['lon'], tz="Asia/Tokyo")
-            
-            # This handles the 9-PCS model (4x100kW + 5x95kW) based on JSON
             systems = build_systems_from_json(extracted_json, azimuth)
             
-            # 4. Load & Prepare Weather
+            # Load Weather
             df_raw = pd.read_csv(weather_csv)
             df_raw['DateTime'] = pd.to_datetime(df_raw['DateTime'])
             df_raw.set_index('DateTime', inplace=True)
             df_raw.index = df_raw.index.tz_localize('Asia/Tokyo')
-
-            ac_output = run_plant_simulation(df_raw, systems, location)
             
-            # 5. Generate Final Report
+            # Run simulation with Mode logic
+            ac_output = run_plant_simulation(df_raw, systems, location, extracted_json, azimuth)
+            
+            # Output
             monthly_kwh = ac_output.resample("ME").sum() / 1000
             yearly_kwh = ac_output.sum() / 1000
-            print(f"\n--- Final Results: {extracted_json['project_information']['project_name']} ---")
-            print("\nMothly Production (kWh):")
-            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            for i, m in enumerate(months):
-                # i+1 corresponds to the month in the resampled series
-                val = monthly_kwh.iloc[i]
-                print(f"  {m}:  {val:>8,.0f} kWh")
-
+            
             print("\n" + "="*70)
-            print("FINAL RESULTS (PVLIB WORKFLOW)")
+            print(f"FINAL RESULTS (PVLIB WORKFLOW - {SIM_MODE})")
             print("="*70)
             print(f"Annual AC Energy: {yearly_kwh:,.0f} kWh")
-    else:
-        print(f"Error: File not found.")
+
+            print("\nMonthly Production (kWh):")
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            for i, m in enumerate(months):
+                print(f"  {m}:  {monthly_kwh.iloc[i]:>8,.0f} kWh")
+            print("="*70)
