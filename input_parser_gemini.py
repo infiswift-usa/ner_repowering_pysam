@@ -104,9 +104,10 @@ class ExtractionState(TypedDict):
     page_images: List[str] 
     structured_data: dict
     error: str
+
 # Globally define heavy objects
 LLM = ChatGoogleGenerativeAI(
-    model="gemini-3-flash-preview", # Use 2.5-flash as it is the most modern vision model right now
+    model="gemini-3-flash-preview", 
     api_key=os.environ.get("GOOGLE_API_KEY"),
     temperature=0
 ).with_structured_output(BlueprintExtraction) 
@@ -207,16 +208,27 @@ app = workflow.compile()
 # SIMULATOR
 # ==========================================
 
+def _normalize_project_name(raw_name: str) -> str:
+    """Extracts trailing name segment from full filename strings.
+    e.g. 'モジュール配置図_RP-0039-SL01-00_Mie Tsu' -> 'Mie Tsu'
+    """
+    parts = raw_name.rsplit("_", 1)
+    return parts[-1].strip() if len(parts) > 1 else raw_name.strip()
+
+
+SITE_LOOKUP: dict = {
+    "Mie Tsu":   {"lat": 34.856, "lon": 136.452},
+    "Mie Fukuo": {"lat": 34.856, "lon": 136.452},
+}
+
 # --- Dynamic Mapping & Calculation ---
 
-def get_site_config(extracted_json):
+def get_site_config(extracted_json: dict) -> tuple:
     """Maps extracted project name to coordinates and normalizes azimuth."""
-    SITE_LOOKUP = {
-        "Mie Tsu": {"lat": 34.856, "lon": 136.452},
-        "Mie Fukuo": {"lat": 34.856, "lon": 136.452}
-    }
-    project_name = extracted_json["project_information"]["project_name"]
-    coords = SITE_LOOKUP.get(project_name, {"lat": 34.856, "lon": 136.452})
+    raw_name = extracted_json["project_information"]["project_name"]
+    project_name = _normalize_project_name(raw_name)
+
+    coords = SITE_LOOKUP.get(project_name)
     
     # Azimuth: 180 is South. '5 degrees West' -> 185
     az_str = extracted_json.get("azimuth_angle", "0 degrees")
@@ -247,7 +259,13 @@ def build_systems_from_json(extracted_json, azimuth):
         
         for group in area["pcs_groups"]:
             # Parse unit count, e.g., "4台" -> 4
-            num_units = int(re.search(r"(\d+)台", group["group_name"]).group(1))
+            match = re.search(r"(\d+)台", group["group_name"])
+            if not match:
+                raise ValueError(
+                    f"Cannot parse unit count from group_name: '{group['group_name']}'. "
+                    "Expected a pattern like '4台' or 'PCS 01~04 (4台)'."
+                )
+            num_units = int(match.group(1))
             
             # DYNAMIC CALCULATIONS:
             # 1. pdc0 = module_output_kw * 1000 (Convert kW to W)
@@ -313,6 +331,7 @@ if __name__ == "__main__":
     pdf_file_path = r"C:\Users\ASUS\Downloads\モジュール配置図_RP-0007-SL03-00_Mie Fukuo.pdf"
     weather_csv = r"D:\VS_CODE\Infiswift\metpv_11_automation\metpv11_clean_v2.csv"
     output_dir = Path(r"D:\VS_CODE\Infiswift")
+
     if os.path.exists(pdf_file_path):
         initial_input = {
             "val_pdf_path": pdf_file_path,
@@ -323,12 +342,13 @@ if __name__ == "__main__":
         }
         final_state = app.invoke(initial_input)
         if final_state.get("error"):
-            print(f"Failed: {final_state['error']}")
+            print(f"❌ Extraction failed: {final_state['error']}")
+            raise SystemExit(1)
         else:
             print("\n✅ Final Extracted JSON:")
             print(json.dumps(final_state["structured_data"], indent=4, ensure_ascii=False))
             extracted_json=final_state["structured_data"]
-            project_name = extracted_json["project_information"]["project_name"]
+            project_name = _normalize_project_name(extracted_json["project_information"]["project_name"])
 
             json_filename = output_dir / f"{project_name}_extracted.json"
             with open(json_filename, "w", encoding="utf-8") as f:
@@ -364,4 +384,5 @@ if __name__ == "__main__":
             print("="*70)
             print(f"Annual AC Energy: {yearly_kwh:,.0f} kWh")
     else:
-        print(f"Error: File not found.")
+        print(f"Error: PDF not found at {pdf_file_path}")
+        raise SystemExit(1)
