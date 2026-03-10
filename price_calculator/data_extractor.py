@@ -348,7 +348,7 @@ def run_extractor(
 
     # ── Use Gemini AI to extract the config
     print("\n>>> Asking Gemini AI to extract config from sheet…")
-'''    try:
+    try:
         ai_data = extract_config_with_ai(wb_for_ai)
     except Exception as e:
         print(f"[ERROR] AI extraction failed: {e}")
@@ -367,7 +367,7 @@ def run_extractor(
         json.dump(config, f, indent=4, ensure_ascii=False)
 
     print(f"\n>>> Config saved to: {json_out}")
-    print(json.dumps(config, indent=2, ensure_ascii=False))'''
+    print(json.dumps(config, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
