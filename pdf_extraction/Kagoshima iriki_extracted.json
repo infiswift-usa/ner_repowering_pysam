@@ -1,6 +1,6 @@
 {
-    "prefecture": "三重県",
-    "subregion": "津",
+    "prefecture": "鹿児島県",
+    "subregion": "川内",
     "system_efficiency": 95,
     "power_efficiency": 1.0,
     "pv_arrays": [
@@ -10,28 +10,26 @@
             "panel_series": 16,
             "panel_parallel": 14,
             "placement_angle": 20,
-            "direction_reasoning": "Order: Plain Line -> Text -> Diamond Line",
-            "direction": -5,
+            "direction": 0,
             "backside_efficiency": 0,
-            "num_arrays": 4
+            "num_arrays": 6
         },
         {
             "pcs": "SunGrow SG100CX-JP",
             "panel_type": "NER132M625E-NGD",
             "panel_series": 16,
-            "panel_parallel": 13,
+            "panel_parallel": 12,
             "placement_angle": 20,
-            "direction_reasoning": "Order: Plain Line -> Text -> Diamond Line",
-            "direction": -5,
+            "direction": 0,
             "backside_efficiency": 0,
-            "num_arrays": 5
+            "num_arrays": 4
         }
     ],
     "output_files": {
-        "output_directory": "D:\\VS_CODE\\Infiswift\\pdf_extraction",
-        "csv_filename": "MAXIFIT_csv_output_Mie Tsu",
-        "print_filename": "MAXIFIT_output_print_Mie Tsu",
-        "config_filename": "MAXIFITconfig_Mie Tsu",
+        "output_directory": "D:\\VS_CODE\\Infiswift",
+        "csv_filename": "MAXIFIT_csv_output_Kagoshima iriki",
+        "print_filename": "MAXIFIT_output_print_Kagoshima iriki",
+        "config_filename": "MAXIFITconfig_Kagoshima iriki",
         "overwrite_existing": false
     }
 }
