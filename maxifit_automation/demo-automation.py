@@ -4,9 +4,17 @@ import json
 import ctypes
 from pywinauto import Application, Desktop
 
+import sys
+from pathlib import Path
+
 # --- CONFIGURATION ---
 SHORTCUT_PATH = r"C:\Users\ASUS\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\MaxiFitPointV5.05.lnk"
-CONFIG_PATH = r"D:\VS_CODE\Infiswift\pdf_extraction\Mie Tsu_extracted.json"
+
+# Compute dynamic config path (or take it from command line argument if provided)
+BASE_DIR = Path(__file__).resolve().parent.parent
+default_config = BASE_DIR / "pdf_extraction" / "Nagano_extracted.json"
+
+CONFIG_PATH = sys.argv[1] if len(sys.argv) > 1 else str(default_config)
 
 def load_config():
     with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
@@ -50,7 +58,7 @@ def connect_app():
         if win.exists():
              print("  Connected Successfully.")
              return win
-    except: pass
+    except Exception: pass
     return None
 
 def click_btn(parent, auto_id):
@@ -67,15 +75,15 @@ def click_btn(parent, auto_id):
         
         # Click -> Invoke -> Physical Click sequence
         try: btn.click(); return True
-        except: 
+        except Exception: 
             try: btn.invoke(); return True
-            except: 
+            except Exception: 
                 try: 
                     btn.set_focus()
                     btn.click_input()
                     return True
-                except: pass
-    except: pass
+                except Exception: pass
+    except Exception: pass
     return False
 
 def select_pcs_item(main_win, index):
@@ -102,7 +110,7 @@ def select_pcs_item(main_win, index):
 
         try:
             target_item.click_input()
-        except:
+        except Exception:
             print("    click_input failed. Trying invoke...")
             target_item.invoke()
             
@@ -132,7 +140,7 @@ def clear_pcs_list(main_win):
                 
                 click_btn(main_win, "pcsDeleteButton")
                 time.sleep(0.3)
-    except: pass
+    except Exception: pass
 
 def set_combo(parent, auto_id, value, is_numeric=False, commit_key="{ENTER}"):
     """Set combo box or numeric up-down value"""
@@ -153,7 +161,7 @@ def set_combo(parent, auto_id, value, is_numeric=False, commit_key="{ENTER}"):
                  time.sleep(0.1)
                  #if commit_key: ctrl.type_keys(commit_key)
                  return True
-            except:
+            except Exception:
                 #ctrl.type_keys("^a" + str(value) + commit_key, with_spaces=True) -->use of enter key is not needed
                 ctrl.type_keys("^a" + str(value) , with_spaces=True)
                 return True
@@ -162,14 +170,14 @@ def set_combo(parent, auto_id, value, is_numeric=False, commit_key="{ENTER}"):
             try:
                 ctrl.select(str(value))
                 return True
-            except:
+            except Exception:
                 try:
                     ctrl.expand(); time.sleep(0.5)
                     Desktop(backend="win32").window(title=str(value)).click_input()
                     return True
-                except: pass
+                except Exception: pass
         return True
-    except: return False
+    except Exception: return False
 
 def handle_net_error():
     """Detect and dismiss .NET Framework error dialogs"""
@@ -187,10 +195,10 @@ def handle_net_error():
                     if btn.exists():
                         btn.click()
                         return True
-                except: pass
+                except Exception: pass
             error_dialog.close()
             return True
-    except: pass
+    except Exception: pass
     return False
 
 def get_safe_filename(base_filename, check_extension=""):
@@ -258,10 +266,10 @@ def handle_save_dialog(filename):
                         try:
                             btn = savewin.child_window(title=title, control_type="Button")
                             if btn.exists(): btn.click(); break
-                        except: pass
+                        except Exception: pass
                     continue
                 break
-        except: pass
+        except Exception: pass
 
     if savewin:
         print(f"    Dialog: {savewin.window_text()}")
@@ -280,7 +288,7 @@ def handle_save_dialog(filename):
             
             # Alt+N to focus filename
             try: savewin.type_keys("%n", with_spaces=True)
-            except: pass
+            except Exception: pass
             time.sleep(0.3)
             
             # Type filename and Enter
@@ -296,7 +304,7 @@ def handle_save_dialog(filename):
                 if conf.exists(timeout=2):
                     conf.set_focus()
                     conf.type_keys("{ENTER}") # Accept Overwrite
-            except: pass
+            except Exception: pass
             return True
         except Exception as e:
             print(f"    Save Error: {e}")
@@ -383,10 +391,13 @@ def main():
         # Configure panel settings
         print(f"  Configuring panel settings...")
         click_btn(main_win, "panelSettingButton01")
-        time.sleep(1.5)
         
         popup = Desktop(backend="win32").window(title_re=".*パネル入力.*")
-        if popup.exists(timeout=5):
+        try:
+            popup.wait('ready', timeout=5)
+        except Exception:
+            pass
+        if popup.exists():
             popup.set_focus()
             set_combo(popup, "panelSelectComboBoxSub", array_config['panel_type'])
             set_combo(popup, "panelSeriesNumericUpDown", array_config['panel_series'], True)
@@ -411,7 +422,7 @@ def main():
     try:
         chk = main_win.child_window(auto_id="snowFlagCheck")
         if chk.exists() and chk.get_toggle_state() == 1: chk.toggle()
-    except: pass
+    except Exception: pass
 
     # STAGE 5: Efficiency
     print("\n[5] Efficiency")
@@ -433,14 +444,13 @@ def main():
     chart = None
     for _ in range(3):
         click_btn(main_win, "totalChartViewButton")
-        time.sleep(1.5)
         try:
-            cands = Desktop(backend="win32").windows(title_re=".*トータルチャート.*")
-            if cands:
-                chart = cands[0]
-                print(f"  Chart Popup: {chart.window_text()}")
-                break
-        except: pass
+            chart_spec = Desktop(backend="win32").window(title_re=".*トータルチャート.*")
+            chart_spec.wait('ready', timeout=5)
+            chart = chart_spec.wrapper_object()
+            print(f"  Chart Popup: {chart.window_text()}")
+            break
+        except Exception: pass
 
     if chart:
         chart.set_focus()
@@ -471,14 +481,11 @@ def main():
         # Wait for Excel
         print("    Waiting for Excel...")
         excel = None
-        for _ in range(30):
-            print(".", end="", flush=True)
-            time.sleep(1)
-            try:
-                s = Desktop(backend="uia").windows(title_re=".*Excel.*")
-                if s: excel = s[0]; break
-            except: pass
-        print()
+        try:
+            excel_spec = Desktop(backend="uia").window(title_re=".*Excel.*")
+            excel_spec.wait('ready', timeout=30)
+            excel = excel_spec.wrapper_object()
+        except Exception: pass
         
         if excel:
             print(f"    Excel Found: {excel.window_text()}")
@@ -506,7 +513,7 @@ def main():
                             print_btn = matches[0]
                             print(f"    Found: {title}")
                             break
-                    except: pass
+                    except Exception: pass
                 handle_net_error()
                 if print_btn:
                     print_btn.click_input()
@@ -517,11 +524,11 @@ def main():
             else:
                 print("    Excel not responding. Trying blind Ctrl+P...")
                 try: excel.type_keys("^p", with_spaces=True); time.sleep(2)
-                except: pass
+                except Exception: pass
 
             # Confirm Print
             try: excel.type_keys("{ENTER}")
-            except: pass
+            except Exception: pass
             
             print_filename = CONFIG.get('output_files', {}).get('print_filename', 'print_output')
             safe_print = get_safe_filename(print_filename, '.pdf')

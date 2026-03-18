@@ -189,9 +189,15 @@ def _normalize_project_name(raw_name: str) -> str:
 # RUN
 # ==========================================
 if __name__ == "__main__":
-    pdf_file_path = r"D:\VS_CODE\Infiswift\モジュール配置図_RP-0040-SL01-00_Kagoshima iriki.pdf"
-    output_dir = Path(r"D:\VS_CODE\Infiswift\maxifit_output")
-    manifest=Path("D:/VS_CODE/Infiswift/pdf_extraction/manifest.csv")
+    # Dynamically resolve project directory
+    BASE_DIR = Path(__file__).resolve().parent
+    PROJECT_ROOT = BASE_DIR.parent
+    
+    pdf_name = "モジュール配置図_RP-0040-SL01-00_Kagoshima iriki.pdf"
+    
+    pdf_file_path = PROJECT_ROOT / pdf_name
+    output_dir = PROJECT_ROOT / "maxifit_output"
+    manifest = BASE_DIR / "manifest.csv"
 
     if os.path.exists(pdf_file_path):
         initial_input = {
@@ -263,7 +269,7 @@ if __name__ == "__main__":
                     "overwrite_existing": False
                 }
             }
-            json_save=Path(r"D:\VS_CODE\Infiswift\pdf_extraction")
+            json_save = BASE_DIR
             json_filename = json_save / f"{project_name}_extracted.json"
             with open(json_filename, "w", encoding="utf-8") as f:
                 json.dump(maxifit_payload, f, indent=4, ensure_ascii=False)
