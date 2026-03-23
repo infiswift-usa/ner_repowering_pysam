@@ -1,30 +1,31 @@
 {
-    "prefecture": "三重県",
-    "subregion": "津",
+    "source": "モジュール配置図_RP-0039-SL01-00_Mie Tsu.pdf",
+    "location": {
+        "area": "三重県",
+        "point": "津"
+    },
     "system_efficiency": 95,
     "power_efficiency": 1.0,
-    "pv_arrays": [
+    "pcs_config": [
         {
-            "pcs": "SunGrow SG100CX-JP",
-            "panel_type": "NER132M625E-NGD",
-            "panel_series": 16,
-            "panel_parallel": 14,
-            "placement_angle": 20,
-            "direction_reasoning": "Order: Plain Line -> Text -> Diamond Line",
-            "direction": -5,
+            "pcs_type": "SunGrow SG100CX-JP",
+            "module_type": "NER132M625E-NGD",
+            "modules_per_string": 16,
+            "strings": 14,
+            "tilt": 20,
+            "azimuth": -5,
             "backside_efficiency": 0,
-            "num_arrays": 4
+            "pcs_count": 4
         },
         {
-            "pcs": "SunGrow SG100CX-JP",
-            "panel_type": "NER132M625E-NGD",
-            "panel_series": 16,
-            "panel_parallel": 13,
-            "placement_angle": 20,
-            "direction_reasoning": "Order: Plain Line -> Text -> Diamond Line",
-            "direction": -5,
+            "pcs_type": "SunGrow SG100CX-JP",
+            "module_type": "NER132M625E-NGD",
+            "modules_per_string": 16,
+            "strings": 13,
+            "tilt": 20,
+            "azimuth": -5,
             "backside_efficiency": 0,
-            "num_arrays": 5
+            "pcs_count": 5
         }
     ],
     "output_files": {

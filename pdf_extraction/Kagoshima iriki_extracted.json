@@ -1,30 +1,31 @@
 {
-    "prefecture": "鹿児島県",
-    "subregion": "川内",
+    "source":"モジュール配置図_RP-0040-SL01-00_Kagoshima iriki.pdf",
+    "location":{ 
+        "area": "鹿児島県",
+        "point": "川内"
+    },
     "system_efficiency": 95,
     "power_efficiency": 1.0,
-    "pv_arrays": [
+    "pcs_config": [
         {
-            "pcs": "SunGrow SG100CX-JP",
-            "panel_type": "NER132M625E-NGD",
-            "panel_series": 16,
-            "panel_parallel": 14,
-            "placement_angle": 20,
-            "direction_reasoning": "Order: Plain Line -> Text -> Diamond Line",
-            "direction": 0,
+            "pcs_type": "SunGrow SG100CX-JP",
+            "module_type": "NER132M625E-NGD",
+            "modules_per_string": 16,
+            "strings": 14,
+            "tilt": 20,
+            "azimuth": 0,
             "backside_efficiency": 0,
-            "num_arrays": 6
+            "pcs_count": 6
         },
         {
-            "pcs": "SunGrow SG100CX-JP",
-            "panel_type": "NER132M625E-NGD",
-            "panel_series": 16,
-            "panel_parallel": 12,
-            "placement_angle": 20,
-            "direction_reasoning": "Order: Plain Line -> Text -> Diamond Line",
-            "direction": 0,
+            "pcs_type": "SunGrow SG100CX-JP",
+            "module_type": "NER132M625E-NGD",
+            "modules_per_string": 16,
+            "strings": 12,
+            "tilt": 20,
+            "azimuth": 0,
             "backside_efficiency": 0,
-            "num_arrays": 4
+            "pcs_count": 4
         }
     ],
     "output_files": {

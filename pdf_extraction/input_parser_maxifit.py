@@ -41,17 +41,17 @@ class SolarModuleSpec(BaseModel):
 class PVArrayConfig(BaseModel):
     """Directly structured for the MaxiFit Automation Script"""
     pcs_group_name: str = Field(..., description="Original name from the document (e.g., 'PCS 01~04 (4台)')")
-    pcs: str = Field(..., description="Map the PCS model. E.g., 'SG100CX-JP' -> 'SunGrow SG100CX-JP', 'SUN2000-50KTL' -> 'HUAWEI SUN2000-50KTL-NHK3'")
-    panel_type: str = Field(..., description="Model number of the solar module used (e.g., 'NER132M625E-NGD')")
-    panel_series: int = Field(..., description="Number of modules in series (直列枚数) (e.g., 16)")
-    panel_parallel: int = Field(..., description="Number of strings per PCS (系統数) (e.g., 14)")
-    placement_angle: int = Field(..., description="Tilt angle for this specific array (e.g., 20).")
-    # Force the model to think out loud before it answers!
+    pcs_type: str = Field(..., description="Map the PCS model. E.g., 'SG100CX-JP' -> 'SunGrow SG100CX-JP', 'SUN2000-50KTL' -> 'HUAWEI SUN2000-50KTL-NHK3'")
+    module_type: str = Field(..., description="Model number of the solar module used (e.g., 'NER132M625E-NGD')")
+    modules_per_string: int = Field(..., description="Number of modules in series (直列枚数) (e.g., 16)")
+    strings: int = Field(..., description="Number of strings per PCS (系統数) (e.g., 14)")
+    tilt: int = Field(..., description="Tilt angle for this specific array (e.g., 20).")
+    # Force the model to think out loud before it answers
     direction_reasoning: str = Field(..., description="Scan horizontally from left to right exactly across the degree text (e.g., '11°' or '5°'). Tell me the exact order of the visual elements from left to right. You MUST output one of these two phrases: 'Order: Plain Line -> Text -> Diamond Line' OR 'Order: Diamond Line -> Text -> Plain Line'..")
     #direction: int = Field(..., description="Azimuth angle as an integer. Use POSITIVE numbers for Left tilts of north arrow, and NEGATIVE numbers for Right tilts of north arrow. (e.g., if north arrow is x degree to right return -x or if north arrow is y degree to left return y).")
-    direction: int = Field(..., description="Azimuth angle as an integer. If your reasoning order is 'Plain Line -> Text -> Diamond Line', the arrow is tilted RIGHT, so output a NEGATIVE number (e.g., -11). If your reasoning order is 'Diamond Line -> Text -> Plain Line', the arrow is tilted LEFT, so output a POSITIVE number (e.g., 11). If perfectly vertical, output 0.")
+    azimuth: int = Field(..., description="Azimuth angle as an integer. If your reasoning order is 'Plain Line -> Text -> Diamond Line', the arrow is tilted RIGHT, so output a NEGATIVE number (e.g., -11). If your reasoning order is 'Diamond Line -> Text -> Plain Line', the arrow is tilted LEFT, so output a POSITIVE number (e.g., 11). If perfectly vertical, output 0.")
     backside_efficiency: int = Field(0, description="Always set to 0 unless specified.")
-    num_arrays: int = Field(..., description="Number of PCS units in this group (e.g., extract 4 from '4台').")
+    pcs_count: int = Field(..., description="Number of PCS units in this group (e.g., extract 4 from '4台').")
 
 class AreaDetails(BaseModel):
     area_name: str = Field(..., description="Name of the area.")
@@ -77,7 +77,7 @@ subregion_map={
     "上伊那郡飯島町": "飯島",
     "薩摩川内市": "川内",
     "三重郡": "四日市"
-}
+} #backup
 
 PCS_MAP ={ 
     "SG100CX-JP": "SunGrow SG100CX-JP"
@@ -188,20 +188,19 @@ def _normalize_project_name(raw_name: str) -> str:
 # ==========================================
 # RUN
 # ==========================================
-if __name__ == "__main__":
+def run_extraction(pdf_file_path: str,pdf_name) -> str:
+    """Runs the PDF extraction process and returns the path to the saved JSON config."""
     # Dynamically resolve project directory
     BASE_DIR = Path(__file__).resolve().parent
     PROJECT_ROOT = BASE_DIR.parent
     
-    pdf_name = "モジュール配置図_RP-0040-SL01-00_Kagoshima iriki.pdf"
-    
-    pdf_file_path = PROJECT_ROOT / pdf_name
+    pdf_file_path = Path(pdf_file_path)
     output_dir = PROJECT_ROOT / "maxifit_output"
     manifest = BASE_DIR / "manifest.csv"
 
     if os.path.exists(pdf_file_path):
         initial_input = {
-            "val_pdf_path": pdf_file_path,
+            "val_pdf_path": str(pdf_file_path),
             "raw_markdown": "",
             "page_images": [],
             "structured_data": {},
@@ -247,20 +246,24 @@ if __name__ == "__main__":
             flat_pv_arrays=[]
             for area in extracted_json["area_breakdown"]:
                 for array in area["pv_arrays"]:
-                    raw_pcs=array["pcs"]
+                    raw_pcs=array["pcs_type"]
                     for key,val in PCS_MAP.items(): # map "SG100CX-JP" to "SunGrow SG100CX-JP"
                         if key in raw_pcs:
-                            array["pcs"] = val
+                            array["pcs_type"] = val
                             break
                     array.pop("pcs_group_name",None) #only needed to count pcs and not for maxifit
+                    array.pop("direction_reasoning",None)
                     flat_pv_arrays.append(array)
 
             maxifit_payload={
-                "prefecture": extracted_json["project_information"]["prefecture"],
-                "subregion": mapped_subreg,
+                "source":pdf_name,
+                "location":{
+                   "area": extracted_json["project_information"]["prefecture"],
+                    "point": mapped_subreg
+                },
                 "system_efficiency": 95,
                 "power_efficiency": 1.0,
-                "pv_arrays": flat_pv_arrays,
+                "pcs_config": flat_pv_arrays,
                 "output_files": {
                     "output_directory": str(output_dir),
                     "csv_filename": f"MAXIFIT_csv_output_{project_name}",
@@ -274,3 +277,21 @@ if __name__ == "__main__":
             with open(json_filename, "w", encoding="utf-8") as f:
                 json.dump(maxifit_payload, f, indent=4, ensure_ascii=False)
             print(f"✅ JSON saved to: {json_filename}")
+            return str(json_filename)
+    else:
+        print(f"❌ File not found: {pdf_file_path}")
+        return None
+
+if __name__ == "__main__":
+    import sys
+    # Dynamically resolve project directory
+    BASE_DIR = Path(__file__).resolve().parent
+    PROJECT_ROOT = BASE_DIR.parent
+    
+    if len(sys.argv) > 1:
+        pdf_name = sys.argv[1]
+    else:
+        pdf_name = "モジュール配置図_RP-0039-SL01-00_Mie Tsu.pdf"
+    
+    pdf_file_path = PROJECT_ROOT / pdf_name
+    run_extraction(str(pdf_file_path),pdf_name)
