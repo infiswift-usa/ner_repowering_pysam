@@ -312,7 +312,6 @@ def run_extractor(
         else:
             print(f"[SKIP] {jepx_csv} not found — JEPX section not updated.")
 
-    if update_needed:
         # ── Update OCCTO section
         if os.path.exists(occto_csv):
             print(f"\n>>> Updating OCCTO from {occto_csv}")
@@ -363,6 +362,7 @@ def run_extractor(
 
     print(f"\n>>> Config saved to: {json_out}")
     print(json.dumps(config, indent=2, ensure_ascii=False))
+    return config
 
 
 if __name__ == "__main__":

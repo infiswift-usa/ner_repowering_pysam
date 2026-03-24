@@ -1,22 +1,49 @@
 import pandas as pd
 import json
 from datetime import datetime
+from sqlalchemy import create_engine
 
 class SolarSimulator:
-    def __init__(self, config_file="simulator_config.json"):
+    def __init__(self, config_file, db_url):
+        self.engine=create_engine(db_url)
+        #default fallback incase we hit db error
         self.reference_prices = {}
         self.balancing_costs = [0.0] * 20
         self.ppa_prices = {}
-        
+        self.non_fossil_value = 0.6
+        self.load_from_db()
+    def load_from_db(self):
+        print("Fetching simulation constants from MySQL...")
         try:
-            with open(config_file, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                self.reference_prices = config.get('reference_prices', {})
-                self.balancing_costs = config.get('balancing_costs', [0.0] * 20)
-                self.ppa_prices = config.get('ppa_prices', {})
-                self.non_fossil_value = config.get('non_fossil_value', 0.6)
+            #----1.Reference price-----
+            # match region column and return value of last available column
+            df_ref=pd.read_sql_table('reference_price',con=self.engine)
+            if not df_ref.empty and '集計' in df_ref.columns:
+                last_col=df_ref.columns[-1]
+                self.reference_prices=df_ref.set_index('集計')[last_col].to_dict()
+            
+            #----2. non fossil value----
+            # returns the last row value of the '加重平均値' column
+            df_nf=pd.read_sql_table("non_fossil",con=self.engine)
+            if not df_nf.empty and '加重平均値' in df_nf.columns:
+                self.non_fossil_value=float(df_nf['加重平均値'].dropna().iloc[-1])
+
+            #----3. balancing costs----
+            df_bal=pd.read_sql_table("balancing_cost",con=self.engine)
+            if not df_bal.empty and df_bal.shape[1]>1:
+                self.balancing_costs=df_bal.iloc[:,1].dropna().astype(float).tolist()
+
+            #----4. PPA price----
+            # match the regions in col[0] and return the respective col[1]
+            df_ppa=pd.read_sql_table("ppa_price",con=self.engine)
+            if not df_ppa.empty and df_ppa.shape[1]>1:
+                col_0=df_ppa.columns[0]
+                col_1=df_ppa.columns[1]
+                self.ppa_prices=df_ppa.set_index(col_0)[col_1].to_dict()
+
         except Exception as e:
-            print(f"Warning: Could not load {config_file}. Using empty defaults. Error: {e}")
+            print(f"⚠️ Warning: Could not load some tables from MySQL. Using defaults. Error: {e}")
+
 
     def month_diff(self, d1, d2):
         return (d2.year - d1.year) * 12 + d2.month - d1.month
@@ -85,7 +112,9 @@ class SolarSimulator:
 
 def run_simulation_pipeline(user_inputs: dict, config_dict: dict = None) -> tuple:
     print("Initializing Solar Simulator with extracted config...")
-    sim = SolarSimulator(config_file=config_dict)
+    config_dict=r"price_calculator\simulator_config.json"
+    db_url="mysql+mysqlconnector://root:params1812@localhost:3306/priceCalci"
+    sim = SolarSimulator(config_dict,db_url)
     
     print("\n--- Project Inputs ---")
     for k, v in user_inputs.items():
@@ -123,13 +152,14 @@ if __name__ == "__main__":
         'rep_ac': 1000.00,
         'rep_dc': 1421.28, #maxifit
         'ex_yield': 1433741.0,   
-        'rep_yield': 2182388.74, # Year 1 Generation input.. maxifit
+        'rep_yield': 2182388.74, # Year 1 Generation input... maxifit
         'ex_deg': 0.007,
         'rep_deg': 0.004,
         'fit_price': 32.0,
         'latest_price': 8.9,
         'op_start_date': datetime(2016, 8, 31),
         'mod_date': datetime(2025, 7, 31),
+
     }
     
     run_simulation_pipeline(example_inputs)
