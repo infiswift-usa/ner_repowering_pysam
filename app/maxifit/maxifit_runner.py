@@ -27,9 +27,8 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MASTER_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
-print(PROJECT_ROOT)
-DEFAULT_MANIFEST = MASTER_ROOT/"specs"/ "manifest.csv"
-SIMULATION_RUNS_DIR = PROJECT_ROOT / "maxifit_output" / "simulation_runs"
+DEFAULT_MANIFEST = PROJECT_ROOT/"specs"/ "manifest.csv"
+SIMULATION_RUNS_DIR = PROJECT_ROOT / "output" / "simulation_runs"
 MAXIFIT_EXE =r"C:\Program Files (x86)\MaxiFitPointVer5\過積載シミュレーション.exe"
 MAIN_WINDOW_TITLE_RE = r".*MAXIFIT.*simulator.*"
 UI_SLEEP = 0.5
@@ -685,7 +684,7 @@ def main() -> int:
     parser.add_argument(
         "--specs",
         type=Path,
-        default=PROJECT_ROOT /"document_extraction"/ "mie tsu_extracted.json",
+        default=PROJECT_ROOT /"specs"/ "mie tsu_extracted.json",
         help="Path to plant specs JSON.",
     )
     parser.add_argument(

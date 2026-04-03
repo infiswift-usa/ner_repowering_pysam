@@ -57,7 +57,7 @@ def run_integration_pipeline(pdf_path: str, user_inputs_json: str = None):
     print("="*60)
     
     demo_automation_script = BASE_DIR / "maxifit" / "maxifit_runner.py"
-    MAIN_DIR = Path(__file__).resolve().parent.parent
+    MAIN_DIR = Path(__file__).resolve().parent
     manifest_csv_path =MAIN_DIR/ "specs" / "manifest.csv"
     
     print("Launching pywinauto robotic batch simulation in dedicated subprocess...")
@@ -115,7 +115,7 @@ def run_integration_pipeline(pdf_path: str, user_inputs_json: str = None):
             
     try:
         # 1. Locate the dynamic runs directory
-        runs_dir = BASE_DIR / "maxifit_output" / "simulation_runs"
+        runs_dir = BASE_DIR / "output" / "simulation_runs"
         
         if not runs_dir.exists():
             print(f"❌ Error: The simulation_runs directory was not created.")
